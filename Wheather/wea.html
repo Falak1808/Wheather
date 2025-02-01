@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="st.css">
+</head>
+<body>
+    <div class="card">
+        <div class="search">
+            <input type="text" id="cityInput" placeholder="Enter city name" spellcheck="false">
+            <button id="searchButton"> <img src="search.png" alt="search icon"> </button>
+        </div>
+        <div class="weather">
+            <img id="weatherIcon" src="rain.png" class="weather-icon" alt="weather icon">
+            <h1 id="temp" class="temp">22°C</h1>
+            <h2 id="city" class="city">New York</h2>
+            <div class="detail">
+                <div class="col">
+                    <img src="humidity.png" alt="humidity icon">
+                    <div>
+                        <p id="humidity" class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="wind.png" alt="wind icon">
+                    <div>
+                        <p id="wind" class="wind">15 km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = '44f7d8739fe7d4918486c2308d86bc90'; // Replace with your OpenWeatherMap API key
+        const searchButton = document.getElementById('searchButton');
+        const cityInput = document.getElementById('cityInput');
+        const tempElement = document.getElementById('temp');
+        const cityElement = document.getElementById('city');
+        const humidityElement = document.getElementById('humidity');
+        const windElement = document.getElementById('wind');
+        const weatherIconElement = document.getElementById('weatherIcon');
+
+        // Fetch weather data from OpenWeatherMap API
+        function getWeather(city) {
+            // Fetch the weather data from the OpenWeatherMap API
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.cod === '404') {
+                        alert('City not found. Please try again.');
+                        return;
+                    }
+                    updateWeatherDisplay(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    alert('Error fetching weather data. Please try again.');
+                });
+        }
+
+        // Update the page with the weather data
+        function updateWeatherDisplay(data) {
+            const temp = data.main.temp;
+            const city = data.name;
+            const humidity = data.main.humidity;
+            const windSpeed = data.wind.speed;
+            const weatherIcon = data.weather[0].icon;
+
+            tempElement.textContent = `${temp}°C`;
+            cityElement.textContent = city;
+            humidityElement.textContent = `${humidity}%`;
+            windElement.textContent = `${windSpeed} km/h`;
+
+            // Set the weather icon from OpenWeatherMap's API
+            weatherIconElement.src = `http://openweathermap.org/img/wn/${weatherIcon}.png`;
+        }
+
+        // Handle the search button click event
+        searchButton.addEventListener('click', () => {
+            const city = cityInput.value.trim();
+            if (city) {
+                getWeather(city);
+            }
+        });
+
+        // Allow pressing Enter to search
+        cityInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                const city = cityInput.value.trim();
+                if (city) {
+                    getWeather(city);
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
